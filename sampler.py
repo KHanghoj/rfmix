@@ -71,6 +71,7 @@ def parse_props(props):
     return(dic)
 
 def sample_map(sample_map, props, n_founders):
+    refs = []
     founders_per_pop = {pop: int(n_founders*prop) for pop, prop in props.items()}
     data = {}
     with open(sample_map, 'r') as fh:
@@ -86,7 +87,11 @@ def sample_map(sample_map, props, n_founders):
         n_founders = founders_per_pop[pop]
         indices = random.sample(range(len(sample_list)), n_founders)
         samples_per_pop[pop] = [sample_list[i] for i in sorted(indices)]
-    return(samples_per_pop)
+        for idx, sample in enumerate(sample_list):
+            if idx not in indices:
+                refs.append((sample, pop))
+
+    return(samples_per_pop, refs)
 
 def main(argv):
     args = parse_args(argv)
@@ -94,22 +99,26 @@ def main(argv):
     random.seed(args.seed)
 
 
-    log = open(args.outbase+".log", 'w')
+    log = open(args.outbase+".sampler.log", 'w')
     print("##ARGUMENTS:", file=log)
     for k,v in vars(args).items():
         print(f"{k} {v}", file=log)
     print("##END", file=log)
 
-    samples_per_pop = sample_map(args.sample_map, props, args.N_founders)
-    with open(args.outbase+".founders", 'w') as fh:
+    (samples_per_pop, refs) = sample_map(args.sample_map, props, args.N_founders)
+    with open(args.outbase+".founders.map", 'w') as fh:
         for pop, sample_list in samples_per_pop.items():
             for samplename in sample_list:
-                print(samplename, pop, file=fh)
+                print(f"{samplename}\t{pop}", file=fh)
+
+    with open(args.outbase+".ref.map", 'w') as fh:
+        for (samplename, pop) in refs:
+            print(f"{samplename}\t{pop}", file=fh)
 
 
     parents_size = args.N_founders
     curr_gen = 0
-    with open(args.outbase+".pedigree", 'w') as fh:
+    with open(args.outbase+".founders.pedigree", 'w') as fh:
         while curr_gen < args.N_gen:
             parents = list(range(parents_size))
             children = []

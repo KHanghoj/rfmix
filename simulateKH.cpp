@@ -334,8 +334,8 @@ int main(int argc, char *argv[]) {
   fprintf(rf,"chm\tpos");
   for(int j=0; j < last_size; j++) {
     phase_switched[j] = 0;
-    fprintf(vf,"\t%d", j);
-    fprintf(rf,"\t%d.0\t%d.1", j, j);
+    fprintf(vf,"\tsim%d", j);
+    fprintf(rf,"\tsim%d.0\tsim%d.1", j, j);
     // fprintf(vf,"\t%s", parents[j]->sample_id);
     // fprintf(rf,"\t%s.0\t%s.1", parents[j]->sample_id, parents[j]->sample_id);
   }
